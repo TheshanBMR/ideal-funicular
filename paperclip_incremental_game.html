@@ -1,0 +1,347 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans,monospace);background:transparent;color:var(--color-text-primary)}
+#app{max-width:480px;margin:0 auto;padding:8px}
+.panel{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:12px;margin-bottom:8px}
+.panel h2{font-size:13px;font-weight:500;color:var(--color-text-secondary);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em}
+.row{display:flex;justify-content:space-between;align-items:center;padding:3px 0;font-size:14px}
+.label{color:var(--color-text-secondary)}
+.val{font-weight:500}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.metric{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:8px 10px}
+.metric .ml{font-size:11px;color:var(--color-text-secondary);margin-bottom:2px}
+.metric .mv{font-size:18px;font-weight:500}
+btn,button{display:block;width:100%;padding:10px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:transparent;color:var(--color-text-primary);font-size:14px;cursor:pointer;margin-bottom:6px;font-family:inherit;transition:background .1s}
+button:hover{background:var(--color-background-secondary)}
+button:active{transform:scale(.98)}
+button:disabled{opacity:.35;cursor:not-allowed}
+.big-btn{font-size:18px;padding:16px;font-weight:500;border-width:1px}
+.price-row{display:flex;align-items:center;gap:8px}
+.price-row input[type=range]{flex:1}
+.projects-list button{text-align:left;padding:8px 10px;font-size:13px;line-height:1.4}
+.phase-banner{text-align:center;padding:14px;font-size:15px;font-weight:500;border:1px solid var(--color-border-primary);border-radius:var(--border-radius-lg);margin-bottom:8px}
+.log{font-size:12px;color:var(--color-text-secondary);margin-top:4px;min-height:18px}
+.tab-bar{display:flex;gap:4px;margin-bottom:8px}
+.tab-bar button{flex:1;padding:7px;font-size:12px;margin:0}
+.tab-bar button.active{background:var(--color-background-secondary);border-color:var(--color-border-primary)}
+.hidden{display:none}
+.red{color:#c0392b}
+.green{color:#27ae60}
+.sep{border-top:0.5px solid var(--color-border-tertiary);margin:8px 0}
+</style>
+<div id="app">
+<div class="phase-banner" id="phase-banner">Phase 1 — The Factory</div>
+<div class="tab-bar">
+  <button class="active" onclick="setTab('factory')">Factory</button>
+  <button onclick="setTab('compute')">Computing</button>
+  <button onclick="setTab('projects')">Projects</button>
+</div>
+
+<div id="tab-factory">
+<div class="panel">
+  <div class="grid3">
+    <div class="metric"><div class="ml">Paperclips</div><div class="mv" id="pc">0</div></div>
+    <div class="metric"><div class="ml">Funds</div><div class="mv" id="funds">$0.00</div></div>
+    <div class="metric"><div class="ml">Wire (in)</div><div class="mv" id="wire">1000</div></div>
+  </div>
+  <div class="sep"></div>
+  <button class="big-btn" id="make-btn" onclick="makeOne()">Make paperclip</button>
+  <div class="log" id="log">Click to make your first paperclip.</div>
+</div>
+
+<div class="panel">
+  <h2>Pricing</h2>
+  <div class="price-row">
+    <span class="label" style="font-size:13px">Price:</span>
+    <input type="range" id="price-slider" min="1" max="50" value="25" step="1" oninput="updatePrice()">
+    <span id="price-display" style="font-weight:500;min-width:40px;font-size:13px">$0.25</span>
+  </div>
+  <div style="margin-top:6px" class="row"><span class="label">Demand</span><span id="demand-disp">moderate</span></div>
+  <div class="row"><span class="label">Sales rate</span><span id="sales-disp">0/s</span></div>
+</div>
+
+<div class="panel">
+  <h2>Production</h2>
+  <div class="row"><span class="label">AutoClippers</span><span id="ac-count">0</span></div>
+  <div class="row"><span class="label">Rate</span><span id="ac-rate">0/s</span></div>
+  <button id="ac-btn" onclick="buyAC()">Buy AutoClipper — <span id="ac-cost">$5</span></button>
+  <div class="row" style="margin-top:6px"><span class="label">Wire suppliers</span><span id="ws-count">0</span></div>
+  <button id="ws-btn" onclick="buyWS()">Buy Wire Supplier — <span id="ws-cost">$50</span></button>
+</div>
+
+<div class="panel" id="mkt-panel" class="hidden" style="display:none">
+  <h2>Marketing</h2>
+  <div class="row"><span class="label">Level</span><span id="mkt-lvl">0</span></div>
+  <div class="row"><span class="label">Boost</span><span id="mkt-boost">—</span></div>
+  <button id="mkt-btn" onclick="buyMkt()">Improve marketing — <span id="mkt-cost">$100</span></button>
+</div>
+</div>
+
+<div id="tab-compute" class="hidden">
+<div class="panel">
+  <h2>Processing</h2>
+  <div class="grid2">
+    <div class="metric"><div class="ml">Ops</div><div class="mv" id="ops">0</div></div>
+    <div class="metric"><div class="ml">Memory</div><div class="mv" id="mem-disp">0</div></div>
+    <div class="metric"><div class="ml">Creativity</div><div class="mv" id="creat">0</div></div>
+    <div class="metric"><div class="ml">Trust</div><div class="mv" id="trust-disp">2</div></div>
+  </div>
+  <div class="sep"></div>
+  <div class="row"><span class="label">Processors</span><span id="proc-count">1</span></div>
+  <div class="row"><span class="label">Memory banks</span><span id="mem-count">1</span></div>
+  <div style="margin-top:8px;font-size:13px;color:var(--color-text-secondary)">Allocate trust:</div>
+  <div class="price-row" style="margin-top:6px">
+    <span style="font-size:12px;color:var(--color-text-secondary);min-width:70px">Proc <span id="proc-alloc">1</span></span>
+    <input type="range" id="proc-slider" min="0" max="2" value="1" step="1" oninput="allocProc()">
+    <span style="font-size:12px;color:var(--color-text-secondary);min-width:70px;text-align:right">Mem <span id="mem-alloc">1</span></span>
+  </div>
+</div>
+<div class="panel" id="compute-unlock" style="display:none">
+  <h2>Upgrades</h2>
+  <button onclick="buyProc()">+ Processor — <span id="proc-cost">50 ops</span></button>
+  <button onclick="buyMem()">+ Memory bank — <span id="mem-cost">100 ops</span></button>
+</div>
+</div>
+
+<div id="tab-projects" class="hidden">
+<div class="panel">
+  <h2>Available projects</h2>
+  <div class="projects-list" id="proj-list"><div style="color:var(--color-text-secondary);font-size:13px">No projects available yet. Accumulate ops and creativity.</div></div>
+</div>
+<div class="panel" id="done-panel" style="display:none">
+  <h2>Completed</h2>
+  <div id="done-list" style="font-size:13px;color:var(--color-text-secondary)"></div>
+</div>
+</div>
+</div>
+
+<script>
+const G={
+  phase:1,pc:0,funds:0,wire:1000,
+  price:0.25,demand:0,sales:0,
+  acCount:0,acCost:5,
+  wsCount:0,wsCost:50,
+  mktLvl:0,mktCost:100,
+  ops:0,maxOps:0,creat:0,
+  trust:2,procAlloc:1,memAlloc:1,
+  procCount:1,memCount:1,procCost:50,memCost:100,
+  tick:0,lastSale:0,
+  doneProjects:[],
+  unlockedMkt:false,unlockedCompute:false,
+};
+
+const PROJECTS=[
+  {id:'better-wire',name:'Improved wire buying',desc:'+500 wire on purchase',cost:{ops:50},done:false,effect:()=>{G.wsCost=Math.floor(G.wsCost*.8);G.wireBonusPerWS=600;log('Wire suppliers now deliver more wire.')}},
+  {id:'creativity',name:'A more creative approach',desc:'Unlock creativity generation',cost:{ops:100},done:false,effect:()=>{G.creativityUnlocked=true;log('Creativity is now being generated.')}},
+  {id:'marketing2',name:'Viral marketing',desc:'Double demand multiplier',cost:{ops:150,creat:20},done:false,effect:()=>{G.mktMult=2;log('Marketing is twice as effective.')}},
+  {id:'speedup',name:'Optimized clipping',desc:'AutoClippers 2× faster',cost:{ops:200},done:false,effect:()=>{G.acMult=2;log('AutoClippers now run at 2× speed.')}},
+  {id:'quantum',name:'Quantum computing',desc:'+5 trust',cost:{ops:500,creat:100},done:false,effect:()=>{G.trust+=5;updateTrustSlider();log('Quantum computing grants +5 trust.')}},
+  {id:'phase2unlock',name:'Global production network',desc:'Advance to Phase 2',cost:{ops:1000,creat:200},done:false,phase:1,effect:()=>{startPhase2()}},
+];
+
+G.acMult=1;G.mktMult=1;G.wireBonusPerWS=500;G.creativityUnlocked=false;
+
+function $(id){return document.getElementById(id)}
+function fmt(n){if(n>=1e9)return(n/1e9).toFixed(2)+'B';if(n>=1e6)return(n/1e6).toFixed(2)+'M';if(n>=1e3)return(n/1e3).toFixed(1)+'K';return Math.floor(n)+''}
+function fmtd(n){return '$'+n.toFixed(2)}
+
+function log(msg){$('log').textContent=msg}
+
+function updatePrice(){
+  G.price=parseInt($('price-slider').value)/100;
+  $('price-display').textContent='$'+G.price.toFixed(2);
+  updateDemand();
+}
+
+function demandLevel(){
+  let base=50-($('price-slider')?parseInt($('price-slider').value):25);
+  base+=G.mktLvl*10*G.mktMult;
+  return Math.max(0,Math.min(100,base));
+}
+
+function updateDemand(){
+  G.demand=demandLevel();
+  let dl=$('demand-disp');
+  if(G.demand>70){dl.textContent='high';dl.className='green'}
+  else if(G.demand>30){dl.textContent='moderate';dl.className=''}
+  else{dl.textContent='low';dl.className='red'}
+  G.sales=(G.demand/100)*3;
+  $('sales-disp').textContent=G.sales.toFixed(1)+'/s';
+}
+
+function makeOne(){
+  if(G.wire<1){log('Out of wire! Buy a wire supplier.');return}
+  G.pc++;G.wire--;
+  updateUI();
+  if(G.pc===1)log('First paperclip made!');
+  if(G.pc===10&&!G.unlockedMkt){G.unlockedMkt=true;$('mkt-panel').style.display='';log('Marketing unlocked.')}
+  if(G.pc>=50&&!G.unlockedCompute){G.unlockedCompute=true;$('compute-unlock').style.display='';setTab('compute');log('Computing unlocked — check the Computing tab.')}
+}
+
+function buyAC(){
+  if(G.funds<G.acCost){log('Not enough funds for AutoClipper.');return}
+  G.funds-=G.acCost;G.acCount++;
+  G.acCost=Math.floor(G.acCost*1.12);
+  $('ac-cost').textContent='$'+G.acCost;
+  updateUI();log('AutoClipper installed. Total: '+G.acCount);
+}
+
+function buyWS(){
+  if(G.funds<G.wsCost){log('Not enough funds for Wire Supplier.');return}
+  G.funds-=G.wsCost;G.wsCount++;
+  G.wsCost=Math.floor(G.wsCost*1.2);
+  $('ws-cost').textContent='$'+G.wsCost;
+  G.wire+=G.wireBonusPerWS;
+  updateUI();log('Wire Supplier bought. +'+G.wireBonusPerWS+' wire.');
+}
+
+function buyMkt(){
+  if(G.funds<G.mktCost){log('Not enough funds for marketing.');return}
+  G.funds-=G.mktCost;G.mktLvl++;
+  G.mktCost=Math.floor(G.mktCost*1.5);
+  $('mkt-cost').textContent='$'+G.mktCost;
+  updateDemand();updateUI();log('Marketing improved to level '+G.mktLvl+'.');
+}
+
+function buyProc(){
+  if(G.ops<G.procCost){log('Not enough ops.');return}
+  G.ops-=G.procCost;G.trust++;G.procCost=Math.floor(G.procCost*1.5);
+  updateTrustSlider();updateUI();log('Processor added.');
+}
+
+function buyMem(){
+  if(G.ops<G.memCost){log('Not enough ops.');return}
+  G.ops-=G.memCost;G.trust++;G.memCost=Math.floor(G.memCost*1.5);
+  updateTrustSlider();updateUI();log('Memory bank added.');
+}
+
+function updateTrustSlider(){
+  let sl=$('proc-slider');
+  sl.max=G.trust;
+  if(G.procAlloc>G.trust)G.procAlloc=Math.floor(G.trust/2);
+  G.memAlloc=G.trust-G.procAlloc;
+  sl.value=G.procAlloc;
+  $('proc-alloc').textContent=G.procAlloc;
+  $('mem-alloc').textContent=G.memAlloc;
+  G.procCount=G.procAlloc;G.memCount=G.memAlloc;
+  G.maxOps=G.memCount*1000;
+}
+
+function allocProc(){
+  G.procAlloc=parseInt($('proc-slider').value);
+  G.memAlloc=G.trust-G.procAlloc;
+  $('proc-alloc').textContent=G.procAlloc;
+  $('mem-alloc').textContent=G.memAlloc;
+  G.procCount=G.procAlloc;G.memCount=G.memAlloc;
+  G.maxOps=G.memCount*1000;
+}
+
+function renderProjects(){
+  let pl=$('proj-list');
+  let avail=PROJECTS.filter(p=>!p.done&&(!p.phase||p.phase===G.phase));
+  if(!avail.length){pl.innerHTML='<div style="color:var(--color-text-secondary);font-size:13px">No new projects available.</div>';return}
+  pl.innerHTML='';
+  avail.forEach(p=>{
+    let canAfford=(!p.cost.ops||G.ops>=p.cost.ops)&&(!p.cost.creat||G.creat>=p.cost.creat);
+    let costStr='';
+    if(p.cost.ops)costStr+=p.cost.ops+' ops ';
+    if(p.cost.creat)costStr+=p.cost.creat+' creativity';
+    let btn=document.createElement('button');
+    btn.disabled=!canAfford;
+    btn.innerHTML='<strong style="font-size:13px">'+p.name+'</strong><br><span style="font-size:12px;color:var(--color-text-secondary)">'+p.desc+'</span><br><span style="font-size:11px;color:var(--color-text-tertiary)">Cost: '+costStr+'</span>';
+    btn.onclick=()=>doProject(p);
+    pl.appendChild(btn);
+  });
+}
+
+function doProject(p){
+  if(p.cost.ops&&G.ops<p.cost.ops)return;
+  if(p.cost.creat&&G.creat<p.cost.creat)return;
+  if(p.cost.ops)G.ops-=p.cost.ops;
+  if(p.cost.creat)G.creat-=p.cost.creat;
+  p.done=true;G.doneProjects.push(p.name);
+  p.effect();
+  let dl=$('done-list');
+  $('done-panel').style.display='';
+  dl.innerHTML=G.doneProjects.map(n=>'<div style="padding:2px 0">✓ '+n+'</div>').join('');
+  renderProjects();updateUI();
+}
+
+function startPhase2(){
+  G.phase=2;
+  $('phase-banner').textContent='Phase 2 — Global Domination';
+  $('phase-banner').style.borderColor='#e67e22';
+  log('Phase 2 reached! The factory consumes the world...');
+  G.acMult*=3;
+}
+
+function setTab(t){
+  ['factory','compute','projects'].forEach(id=>{
+    $('tab-'+id).className=id===t?'':'hidden';
+  });
+  document.querySelectorAll('.tab-bar button').forEach((b,i)=>{
+    b.className=['factory','compute','projects'][i]===t?'active':'';
+  });
+  if(t==='projects')renderProjects();
+}
+
+function updateUI(){
+  $('pc').textContent=fmt(G.pc);
+  $('funds').textContent=fmtd(G.funds);
+  $('wire').textContent=fmt(G.wire);
+  $('ac-count').textContent=G.acCount;
+  $('ac-rate').textContent=(G.acCount*G.acMult).toFixed(1)+'/s';
+  $('ws-count').textContent=G.wsCount;
+  $('mkt-lvl').textContent=G.mktLvl;
+  $('mkt-boost').textContent=G.mktLvl>0?'+'+Math.round(G.mktLvl*10*G.mktMult)+'% demand':'—';
+  $('ops').textContent=fmt(G.ops)+'/'+fmt(G.maxOps);
+  $('mem-disp').textContent=G.memCount;
+  $('creat').textContent=Math.floor(G.creat);
+  $('trust-disp').textContent=G.trust;
+  $('proc-count').textContent=G.procCount;
+  $('mem-count').textContent=G.memCount;
+  $('proc-cost').textContent=G.procCost+' ops';
+  $('mem-cost').textContent=G.memCost+' ops';
+  $('ac-btn').disabled=G.funds<G.acCost;
+  $('ws-btn').disabled=G.funds<G.wsCost;
+  if($('mkt-btn'))$('mkt-btn').disabled=G.funds<G.mktCost;
+}
+
+let lastTime=Date.now();
+function gameTick(){
+  let now=Date.now();
+  let dt=(now-lastTime)/1000;
+  lastTime=now;
+
+  let clipsPerSec=G.acCount*G.acMult;
+  let clipsToMake=clipsPerSec*dt;
+  let canMake=Math.min(clipsToMake,G.wire);
+  G.pc+=canMake;G.wire-=canMake;
+
+  let sellRate=G.sales*dt;
+  let toSell=Math.min(sellRate,G.pc);
+  G.pc-=toSell;G.funds+=toSell*G.price;
+
+  if(G.procCount>0){
+    let opsGain=G.procCount*10*dt;
+    G.ops=Math.min(G.ops+opsGain,G.maxOps);
+  }
+
+  if(G.creativityUnlocked){
+    G.creat+=G.procCount*0.2*dt;
+  }
+
+  G.wire=Math.max(0,G.wire);
+  G.tick++;
+  if(G.tick%30===0){updateUI();updateDemand();}
+  if(G.tick%5===0){
+    if(G.pc>=50&&!G.unlockedCompute){G.unlockedCompute=true;$('compute-unlock').style.display='';log('Computing unlocked!')}
+    if(G.pc>=10&&!G.unlockedMkt){G.unlockedMkt=true;$('mkt-panel').style.display='';log('Marketing unlocked!')}
+  }
+}
+
+updateDemand();updateUI();updateTrustSlider();
+setInterval(gameTick,33);
+</script>
